@@ -85,6 +85,7 @@ public class Player : MonoBehaviour
     {
         CheckCollision();
         AnimatorControllers();
+
         slideTimerCounter -= Time.deltaTime;
         slideCoolDownCounter -= Time.deltaTime;
 
@@ -339,6 +340,8 @@ public class Player : MonoBehaviour
         wallDetected = Physics2D.BoxCast(wallCheck.position, wallCheckSize, 0, Vector2.zero, 0, whatIsGround);
 
     }
+
+    // Hàm này không hoạt động khi build 
     private void OnDrawGizmos()
     {
         Gizmos.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y - groundCheckDistance));
