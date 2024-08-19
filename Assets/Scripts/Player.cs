@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     Rigidbody2D rb;
     Animator animator;
     SpriteRenderer spriteRenderer;
+  
 
 
     private bool isDead;
@@ -90,6 +91,8 @@ public class Player : MonoBehaviour
         slideCoolDownCounter -= Time.deltaTime;
 
         extraLife = moveSpeed >= maxSpeed;
+       
+        /*
         if (Input.GetKeyDown(KeyCode.K) && !isDead)
         {
             Knockback();
@@ -98,7 +101,7 @@ public class Player : MonoBehaviour
         {
             StartCoroutine(Die());
         }
-
+        */
         if (isDead)
         {
             return;
@@ -137,10 +140,11 @@ public class Player : MonoBehaviour
         isDead = true;
         rb.velocity = knockbackDir;
         animator.SetBool("isDead",true);
+
+        Time.timeScale = .6f;
         yield return new WaitForSeconds(1f);
         rb.velocity = new Vector2(0, 0);
-        yield return new WaitForSeconds(1f);
-        GameManager.Instance.RestartLevel();
+        GameManager.Instance.GameEnded();
 
     }
     #region Knockback

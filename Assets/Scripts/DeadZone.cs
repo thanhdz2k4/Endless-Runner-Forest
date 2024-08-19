@@ -8,7 +8,7 @@ public class DeadZone : MonoBehaviour
     {
         if(collision.GetComponent<Player>() != null)
         {
-            GameManager.Instance.RestartLevel();
+            GameManager.Instance.GameEnded();
         }
     }
 }

@@ -7,7 +7,8 @@ public class LedgeDectection : MonoBehaviour
     [SerializeField] float radius;
     [SerializeField] LayerMask whatIsGround;
     Player player;
-    private bool canDetected; 
+    private bool canDetected=true; 
+    private BoxCollider2D boxCd => GetComponent<BoxCollider2D>();
     private void Awake()
     {
         player = GetComponentInParent<Player>();
@@ -29,6 +30,14 @@ public class LedgeDectection : MonoBehaviour
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
+        Collider2D[] colliders = Physics2D.OverlapBoxAll(boxCd.bounds.center, boxCd.size, 0);
+        foreach (var hit in colliders)
+        {
+            if(hit.gameObject.GetComponent<PlatformController>() != null)
+            {
+                return;
+            }
+        }
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             canDetected = true;
