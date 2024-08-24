@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Player : MonoBehaviour
 {
@@ -16,20 +17,27 @@ public class Player : MonoBehaviour
     [HideInInspector] public bool playerUnlooker;
     [HideInInspector] public bool extraLife;
 
+    [Header("VFX")]
+    [SerializeField] ParticleSystem dustFx;
+    [SerializeField] ParticleSystem bloodFx;
+
     [Header("Knockback info")]
     [SerializeField] Vector2 knockbackDir;
     private bool isKnocked;
     private bool canBeKnocked = true;
 
     [Header("Move info")]
+    [SerializeField] float speedToSurvice = 18;
     [SerializeField] float moveSpeed ;
     [SerializeField] float maxSpeed;
-    [SerializeField] float speedMultiplier;//bộ nhân tốc độ
+    [SerializeField] float speedMultiplier;
     private float defaultSpeed;
     [Space]
-    [SerializeField] float milestoneIncreaser;//bộ tăng cột mốc
+    [SerializeField] float milestoneIncreaser;
     private float defaultMilestoneIncreaser;
-    private float speedMilestone; // cột mốc tốc độ
+    private float speedMilestone; 
+
+    private bool readyToLand;
 
     [Header("Jump info")]
     [SerializeField] float jumpForce ;
@@ -43,7 +51,7 @@ public class Player : MonoBehaviour
     private float slideTimerCounter;
     private bool isSliding;
     [SerializeField] private float slideCooldown ;
-    private float slideCoolDownCounter;
+    [HideInInspector] public float slideCoolDownCounter;
 
     [Header("Collision info")]
     [SerializeField] float groundCheckDistance;
@@ -58,23 +66,26 @@ public class Player : MonoBehaviour
     [HideInInspector] public bool ledgeDetected;
 
     [Header("Ledge info")]
-    [SerializeField] private Vector2 preClimbOffset; //độ dời cho vị trí trước khi leo
-    [SerializeField] private Vector2 postClimbOffset;//độ dời cho vị trí sau khi leo
-    private Vector2 climbBegunPosition;//vị trí bắt đầu leo 
-    private Vector2 climbOverPosition;//vị trí leo qua 
+    [SerializeField] private Vector2 preClimbOffset; 
+    [SerializeField] private Vector2 postClimbOffset;
+    private Vector2 climbBegunPosition;
+    private Vector2 climbOverPosition;
 
-    private bool canGrabLedge = true; //có thể bám cạnh
-    private bool canClimb;//có thể leo
+    private bool canGrabLedge = true; 
+    private bool canClimb;
 
-    private void Awake()
+
+    private float obstacleTimer;
+    private bool isObstacleDetected;
+    private bool obstacleTimerStarted;
+
+    
+    private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-    }
-    private void Start()
-    {
-        
+
         slideCoolDownCounter = slideCooldown;
         speedMilestone = milestoneIncreaser;
         defaultSpeed = moveSpeed;
@@ -90,18 +101,7 @@ public class Player : MonoBehaviour
         slideTimerCounter -= Time.deltaTime;
         slideCoolDownCounter -= Time.deltaTime;
 
-        extraLife = moveSpeed >= maxSpeed;
-       
-        /*
-        if (Input.GetKeyDown(KeyCode.K) && !isDead)
-        {
-            Knockback();
-        }
-        if (Input.GetKeyDown(KeyCode.O) && !isDead)
-        {
-            StartCoroutine(Die());
-        }
-        */
+        extraLife = moveSpeed >= speedToSurvice;
         if (isDead)
         {
             return;
@@ -117,15 +117,64 @@ public class Player : MonoBehaviour
         if (isGrounded)
         {
             canDoubleJump = true;
-            
+
         }
         SpeedController();
+        CheckForLanding();
+
         CheckForLedge();
         CheckForSlideCancel();
         CheckInput();
+
+        UpdateObstacleTimer();
     }
+
+    private void StartObstacleTimer()
+    {
+        if (!obstacleTimerStarted)
+        {
+            Debug.Log("Obstacle detected, starting timer.");
+            obstacleTimer = 3f; 
+            isObstacleDetected = true;
+            obstacleTimerStarted = true; 
+        }
+    }
+
+    public void StopObstacleTimer()
+    {
+        Debug.Log("Obstacle cleared, stopping timer.");
+        isObstacleDetected = false;
+        obstacleTimerStarted = false; 
+    }
+
+    private void UpdateObstacleTimer()
+    {
+        if (isObstacleDetected)
+        {
+            obstacleTimer -= Time.deltaTime;
+            if (obstacleTimer <= 0)
+            {
+                StartCoroutine(Die());
+            }
+        }
+    }
+
+    private void CheckForLanding()
+    {
+        if (rb.velocity.y < -5 && !isGrounded)
+        {
+            readyToLand = true;
+        }
+        if (readyToLand && isGrounded)
+        {
+            dustFx.Play();
+            readyToLand = false;
+        }
+    }
+
     public void Damage()
     {
+        bloodFx.Play();
         if (extraLife)
         {
             Knockback();
@@ -137,12 +186,15 @@ public class Player : MonoBehaviour
     }
     private IEnumerator Die()
     {
+        AudioManager.Instance.PlaySFX(3);
         isDead = true;
         rb.velocity = knockbackDir;
         animator.SetBool("isDead",true);
 
         Time.timeScale = .6f;
         yield return new WaitForSeconds(1f);
+
+        Time.timeScale = 1f;
         rb.velocity = new Vector2(0, 0);
         GameManager.Instance.GameEnded();
 
@@ -199,6 +251,10 @@ public class Player : MonoBehaviour
     #region SpeedControll
     private void SpeedReset()
     {
+        if (isSliding)
+        {
+            return;
+        }
         moveSpeed = defaultSpeed;
         milestoneIncreaser = defaultMilestoneIncreaser;
     }
@@ -272,33 +328,44 @@ public class Player : MonoBehaviour
     }
 
     #region Inputs
-    private void SlideButton()
+    public void SlideButton()
     {
+        if (isDead)
+        {
+            return;
+        }
         if (rb.velocity.x != 0 && slideCoolDownCounter < 0)
         {
+            dustFx.Play();
             isSliding = true;
             slideTimerCounter = slideTimer;
             slideCoolDownCounter = slideCooldown;
         }
     }
 
-    private void JumpButton()
+    public void JumpButton()
     {
-        if (isSliding)
+        if (isSliding || isDead)
         {
             return;
         }
-
+        RollAnimationFinished(); 
 
         if (isGrounded)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            Jump(jumpForce);
         }
         else if (canDoubleJump)
         {
             canDoubleJump = false;
-            rb.velocity = new Vector2(rb.velocity.x, doubleJumpForce);
+            Jump(doubleJumpForce);
         }
+    }
+    private void Jump(float force)
+    {
+        dustFx.Play();
+        AudioManager.Instance.PlaySFX(Random.Range(1, 2));
+        rb.velocity = new Vector2 (rb.velocity.x, force);
     }
     private void CheckInput()
     {
@@ -343,9 +410,19 @@ public class Player : MonoBehaviour
         ceillingDetected = Physics2D.Raycast(transform.position, Vector2.up, ceillingCheckDistance, whatIsGround);
         wallDetected = Physics2D.BoxCast(wallCheck.position, wallCheckSize, 0, Vector2.zero, 0, whatIsGround);
 
+        if(wallDetected)
+        {
+            
+            StartObstacleTimer();
+        }
+        else
+        {
+            StopObstacleTimer(); 
+        }
+
     }
 
-    // Hàm này không hoạt động khi build 
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y - groundCheckDistance));

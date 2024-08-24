@@ -66,7 +66,8 @@ public class UI_Shop : MonoBehaviour
     }
     public void PurchaseColor(Color color, int price, ColorType colorType)
     {
-       if(EnoughMoney(price))
+        AudioManager.Instance.PlaySFX(4);
+        if (EnoughMoney(price))
         {
             if (colorType == ColorType.platformColor)
             {

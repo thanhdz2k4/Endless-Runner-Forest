@@ -8,6 +8,7 @@ public class Coin : MonoBehaviour
     {
         if(collision.GetComponent<Player>() != null)
         {
+            AudioManager.Instance.PlaySFX(0);
             GameManager.Instance.coins++;
             Destroy(gameObject);
         }
