@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using Random = UnityEngine.Random;
 
 public class Player : MonoBehaviour
@@ -79,6 +80,8 @@ public class Player : MonoBehaviour
     private bool isObstacleDetected;
     private bool obstacleTimerStarted;
 
+    [SerializeField]
+    UnityEvent eventStuckAction;
     
     private void Start()
     {
@@ -412,7 +415,7 @@ public class Player : MonoBehaviour
 
         if(wallDetected)
         {
-            
+            eventStuckAction?.Invoke();
             StartObstacleTimer();
         }
         else
