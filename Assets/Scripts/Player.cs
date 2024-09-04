@@ -8,13 +8,13 @@ using Random = UnityEngine.Random;
 
 public class Player : MonoBehaviour
 {
-    Rigidbody2D rb;
+    public Rigidbody2D rb;
     Animator animator;
     SpriteRenderer spriteRenderer;
   
 
 
-    private bool isDead;
+    public bool isDead;
     [HideInInspector] public bool playerUnlooker;
     [HideInInspector] public bool extraLife;
 
@@ -187,6 +187,9 @@ public class Player : MonoBehaviour
             StartCoroutine(Die());
         }
     }
+
+    
+    
     private IEnumerator Die()
     {
         AudioManager.Instance.PlaySFX(3);
@@ -202,6 +205,7 @@ public class Player : MonoBehaviour
         GameManager.Instance.GameEnded();
 
     }
+    
     #region Knockback
     private IEnumerator Invincibility()
     {

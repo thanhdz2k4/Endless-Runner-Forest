@@ -7,6 +7,9 @@ public class LedgeDectection : MonoBehaviour
     [SerializeField] float radius;
     [SerializeField] LayerMask whatIsGround;
     Player player;
+    [SerializeField] private Enemy enemy;
+    public bool ledgeDetected;
+
     private bool canDetected=true; 
     private BoxCollider2D boxCd => GetComponent<BoxCollider2D>();
     private void Awake()
@@ -15,13 +18,17 @@ public class LedgeDectection : MonoBehaviour
     }
     private void Update()
     {
-        if (canDetected)
+        if (player != null && canDetected)
         {
             player.ledgeDetected = Physics2D.OverlapCircle(transform.position, radius, whatIsGround);
             if (player.ledgeDetected)
             {
                 player.StopObstacleTimer();
             }
+        }
+        if(enemy != null && canDetected)
+        {
+            enemy.ledgeDetected = Physics2D.OverlapCircle(transform.position, radius, whatIsGround);
         }
 
     }

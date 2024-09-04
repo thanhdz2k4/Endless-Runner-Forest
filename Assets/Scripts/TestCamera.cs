@@ -13,7 +13,17 @@ public class TestCamera : MonoBehaviour
     private float speedMilestone;
     [SerializeField] float milestoneIncreaser;
     private float defaultMilestoneIncreaser;
-    // Start is called before the first frame update
+
+    [Header("Player Reference")]
+    [SerializeField] Player player; 
+
+    [Header("Camera Follow Settings")]
+    [SerializeField] float followSpeed = 2f; 
+    [SerializeField] float stopFollowDelay = .1f; 
+
+    private bool isFollowingPlayer = true;
+    private float stopFollowTimer;
+
     void Start()
     {
         speedMilestone = milestoneIncreaser;
@@ -21,11 +31,47 @@ public class TestCamera : MonoBehaviour
         defaultMilestoneIncreaser = milestoneIncreaser;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        transform.position += Vector3.right * moveSpeed * Time.deltaTime;
-        SpeedController();
+        if (isFollowingPlayer)
+        {
+            FollowPlayer();
+        }
+        else
+        {
+            transform.position += Vector3.right * moveSpeed * Time.deltaTime;
+            SpeedController();
+        }
+
+        if (player.isDead)
+        {
+            stopFollowTimer += Time.deltaTime;
+            if (stopFollowTimer >= stopFollowDelay)
+            {
+                isFollowingPlayer = false;
+            }
+        }
+        else
+        {
+            stopFollowTimer = 0;
+            isFollowingPlayer = true;
+        }
+
+       
+        if (player.rb.velocity.x == 0)
+        {
+            isFollowingPlayer = false;
+        }
+        else
+        {
+            isFollowingPlayer = true;
+        }
+    }
+
+    private void FollowPlayer()
+    {
+        Vector3 targetPosition = new Vector3(player.transform.position.x, transform.position.y, transform.position.z);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, followSpeed * Time.deltaTime);
     }
 
     private void SpeedController()
