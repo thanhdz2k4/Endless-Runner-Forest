@@ -436,5 +436,34 @@ public class Player : MonoBehaviour
         Gizmos.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y + ceillingCheckDistance));
         Gizmos.DrawCube(wallCheck.position, wallCheckSize);
     }
-    
+    /*
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Checkpoint"))
+        {
+            SwitchToNewCharacter(collision.transform);
+        }
+    }
+
+    private void SwitchToNewCharacter(Transform checkpoint)
+    {
+        GameObject newCharacter = GameObject.FindWithTag("NewCharacter");
+        if (newCharacter != null)
+        {
+            Player newPlayer = newCharacter.GetComponent<Player>();
+            if (newPlayer != null)
+            {
+                newPlayer.moveSpeed = this.moveSpeed;
+                newPlayer.isDead = this.isDead;
+                newPlayer.extraLife = this.extraLife;
+                this.enabled = false;
+                newPlayer.enabled = true;
+                Destroy(this.gameObject);
+            }
+        }
+    }
+    */
+
 }
+
+

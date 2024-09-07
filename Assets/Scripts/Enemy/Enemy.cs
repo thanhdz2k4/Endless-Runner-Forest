@@ -196,4 +196,29 @@ public class Enemy : MonoBehaviour
         Gizmos.DrawWireCube(wallCheck.position, wallCheckSize);
     }
 
+    /*
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Checkpoint"))
+        {
+            SwitchToNewCharacter(collision.transform);
+        }
+    }
+
+    private void SwitchToNewCharacter(Transform checkpoint)
+    {
+        GameObject newCharacter = GameObject.FindWithTag("NewCharacter");
+        if (newCharacter != null)
+        {
+            Enemy newEnemy = newCharacter.GetComponent<Enemy>();
+            if (newEnemy != null)
+            {
+                newEnemy.moveSpeed = this.moveSpeed;
+                this.enabled = false;
+                newEnemy.enabled = true;
+                Destroy(this.gameObject);
+            }
+        }
+    }
+    */
 }

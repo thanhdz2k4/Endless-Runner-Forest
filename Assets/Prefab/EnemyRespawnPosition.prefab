@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4676856682935193116}
   m_Layer: 0
   m_Name: EnemyRespawnPosition
-  m_TagString: Untagged
+  m_TagString: Checkpoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -93,7 +93,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 4458897667657028172, guid: bf427b5e1f62a1146b052c4f4b6e21f1, type: 3}
   respawnPosition: {fileID: 5211328531073129848}
-  chaneToSpawn: 99
+  chanceToSpawn: 0
 --- !u!1 &4032047350585664403
 GameObject:
   m_ObjectHideFlags: 0
